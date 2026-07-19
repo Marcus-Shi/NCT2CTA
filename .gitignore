@@ -1,0 +1,108 @@
+# =========================
+# 1. Python 编译与运行缓存
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# =========================
+# 2. 虚拟环境 (Virtual Environments)
+# =========================
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+miniconda3/
+
+# =========================
+# 3. Jupyter Notebook & IDE 配置文件
+# =========================
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.spyderproject
+.spyproject
+*.swp
+*.swo
+
+# =========================
+# 4. 深度学习模型 & 训练日志
+# =========================
+# 模型权重文件
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+checkpoints/
+models/
+
+# 训练日志与可视化
+runs/
+wandb/
+lightning_logs/
+logs/
+*.log
+
+# =========================
+# 5. 大型数据集 & 医疗影像/图像文件
+# =========================
+# 存放数据的通用文件夹
+data/
+datasets/
+dataset/
+
+# 压缩包与大型文件
+*.tar
+*.tar.gz
+*.zip
+*.rar
+*.csv
+
+# 医疗影像及常见 3D/2D 图像格式
+*.nii
+*.nii.gz
+*.mha
+*.mhd
+*.raw
+*.nrrd
+*.dcm
+*.h5
+*.hdf5
+*.npy
+*.npz
+
+# =========================
+# 6. 操作系统生成的临时文件
+# =========================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+ehthumbs.db
+Thumbs.db
+desktop.ini

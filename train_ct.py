@@ -13,9 +13,25 @@ python train_ct.py \
   --gradient_accumulate_every 2 \
   --timesteps 250 \
   --train_num_steps 100000
+
+With a train/val/test split (see make_split.py), restrict training to the
+"train" cases only:
+python train_ct.py \
+  --nct_dir /home/maia-user/scy/Sample-Combine-preprocessed/nct \
+  --cta_dir /home/maia-user/scy/Sample-Combine-preprocessed/cta \
+  --results_folder ./results_nct_cta \
+  --split_json /home/maia-user/scy/splits.json \
+  --split_name train \
+  --input_size 128 \
+  --depth_size 64 \
+  --batchsize 1 \
+  --gradient_accumulate_every 2 \
+  --timesteps 250 \
+  --train_num_steps 100000
 """
 
 import argparse
+import json
 import os
 
 os.environ.setdefault("CUDA_DEVICE_ORDER", "PCI_BUS_ID")
@@ -34,6 +50,24 @@ def parse_args():
     parser.add_argument("--cta_dir", type=str, default="/home/maia-user/scy/Sample-Combine-preprocessed/cta")
     parser.add_argument("--samples_per_epoch", type=int, default=2000)
     parser.add_argument("--cache_size", type=int, default=2)
+
+    parser.add_argument(
+        "--split_json",
+        type=str,
+        default="",
+        help=(
+            "Path to a splits.json (see make_split.py) with 'train'/'val'/'test' "
+            "case-ID lists. If empty, uses every case found in --nct_dir/--cta_dir "
+            "(no split)."
+        ),
+    )
+    parser.add_argument(
+        "--split_name",
+        type=str,
+        default="train",
+        choices=["train", "val", "test"],
+        help="Which split_json key to train on. Only used if --split_json is set.",
+    )
 
     parser.add_argument("--input_size", type=int, default=128, help="Patch H/W")
     parser.add_argument("--depth_size", type=int, default=64, help="Patch D")
@@ -64,11 +98,20 @@ def main():
     input_size = args.input_size
     depth_size = args.depth_size
 
+    case_list = None
+    if args.split_json:
+        with open(args.split_json) as f:
+            split = json.load(f)
+        case_list = split[args.split_name]
+        print(f"Loaded split_json={args.split_json}, split_name={args.split_name}, "
+              f"{len(case_list)} cases")
+
     dataset = PairedCTPatchDataset(
         nct_dir=args.nct_dir,
         cta_dir=args.cta_dir,
         patch_size=(depth_size, input_size, input_size),
         samples_per_epoch=args.samples_per_epoch,
+        case_list=case_list,
     )
 
     # U-Net input = noisy CTA + NCT condition = 2 channels.

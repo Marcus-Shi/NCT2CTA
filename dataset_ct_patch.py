@@ -14,7 +14,16 @@ class PairedCTPatchDataset(Dataset):
         cta_dir,
         patch_size=(64, 128, 128),   # D, H, W
         samples_per_epoch=2000,
+        case_list=None,
     ):
+        """
+        case_list: optional list of case IDs (e.g. "PAT_000", no extension)
+            to restrict this dataset to. Used for train/val/test splits --
+            the same case_list can be reused across differently resampled
+            preprocessed folders (orig/2x/3x) since they share the same
+            case IDs. If None, uses every matched case in nct_dir/cta_dir
+            (original behavior).
+        """
         self.nct_dir = Path(nct_dir)
         self.cta_dir = Path(cta_dir)
 
@@ -30,11 +39,25 @@ class PairedCTPatchDataset(Dataset):
         assert len(self.case_names) == len(self.nct_paths) == len(self.cta_paths), \
             "NCT 和 CTA 文件数量或命名不一致"
 
+        if case_list is not None:
+            case_list_set = set(case_list)
+            self.case_names = [c for c in self.case_names if self._case_id(c) in case_list_set]
+            assert len(self.case_names) > 0, \
+                f"case_list 过滤后没有匹配的病例，case_list={sorted(case_list_set)[:10]}..."
+
         self.patch_d, self.patch_h, self.patch_w = patch_size
         self.samples_per_epoch = samples_per_epoch
 
         print(f"Loaded {len(self.case_names)} paired NCT-CTA cases")
         print(f"Patch size: D={self.patch_d}, H={self.patch_h}, W={self.patch_w}")
+
+    @staticmethod
+    def _case_id(filename):
+        if filename.endswith(".nii.gz"):
+            return filename[:-7]
+        if filename.endswith(".nii"):
+            return filename[:-4]
+        return filename
 
     def __len__(self):
         return self.samples_per_epoch
